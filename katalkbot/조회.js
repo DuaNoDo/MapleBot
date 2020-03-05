@@ -9,42 +9,55 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
 		if(commander_name.indexOf(sender)==-1){
 			return;
 		}
-		msg = msg.replace('!조회 ','');
-		var name = msg.toLowerCase();
+
+		var sendInfo=new Object();//호출한사람 시간 객체
+
+		if((!sender in sendInfo) || sendInfo[sender]+5<=getTime()){// 센더가 딕셔너리에 포함되어있지 않고, 5분이상이 지났을때
+			 //쿨타임 조정시 위의 [sender]+n(숫자) 를 원하는 분으로 설정
+			sendInfo[sender]=getTime();				//현재 시간의 분을 넣어버림
+			msg = msg.replace('!조회 ','');
+			var name = msg.toLowerCase();
 
 
-		var url = Utils.getWebText("https://maplestory.nexon.com/Ranking/World/Total?c="+msg);
-		var wor_num= url.split("search_com_chk")[1].split('img src="https://ssl.nx.com/s2/game/maplestory/renewal/common/world_icon/icon_')[1].split(".png")[0];
+			var url = Utils.getWebText("https://maplestory.nexon.com/Ranking/World/Total?c="+msg);
+			var wor_num= url.split("search_com_chk")[1].split('img src="https://ssl.nx.com/s2/game/maplestory/renewal/common/world_icon/icon_')[1].split(".png")[0];
 
 
-		if(world_num==null){
-				replier.reply('랭킹정보가 없습니다.');
-			return;
+			if(world_num==null){
+					replier.reply('랭킹정보가 없습니다.');
+				return;
+			}
+
+
+			var url_2 = Utils.getWebText("https://maplestory.nexon.com/Ranking/Union?c="+msg);
+
+			url = url.toLowerCase();
+			url_2 = url_2.toLowerCase();
+
+			var data = url.split('>'+name+'</a>')[1].split('</tr>')[0].replace(/(<([^>]+)>)/g, "");
+			data = data.replace(/ /gi, '').replace(/\n\n\n/gi, '').replace(/\n\n/gi, '');
+			data = data.split('\n');
+
+			if(url_2.indexOf('랭킹정보가 없습니다.')!=-1)
+				var bon = 'X';
+			else
+				var bon = 'O';
+
+			var job = data[0].split('lv.')[0];
+			var lev	= 'Lv.'+data[0].split('lv.')[1];
+			var pop = data[2];
+			var gld = data[3];
+			if(!data[3])
+				gld='없음';
+
+			var str = '['+msg+']\n서버: '+world_name[wor_num-2]+'\n직업: '+job+'\n레벨: '+lev+'\n인기도: '+pop+'\n길드: '+gld+'\n대표캐릭터 여부: '+bon;
+			replier.reply(str);
+		}else{
+				return;
 		}
-
-
-		var url_2 = Utils.getWebText("https://maplestory.nexon.com/Ranking/Union?c="+msg);
-
-		url = url.toLowerCase();
-		url_2 = url_2.toLowerCase();
-
-		var data = url.split('>'+name+'</a>')[1].split('</tr>')[0].replace(/(<([^>]+)>)/g, "");
-		data = data.replace(/ /gi, '').replace(/\n\n\n/gi, '').replace(/\n\n/gi, '');
-		data = data.split('\n');
-
-		if(url_2.indexOf('랭킹정보가 없습니다.')!=-1)
-			var bon = 'X';
-		else
-			var bon = 'O';
-
-		var job = data[0].split('lv.')[0];
-		var lev	= 'Lv.'+data[0].split('lv.')[1];
-		var pop = data[2];
-		var gld = data[3];
-		if(!data[3])
-			gld='없음';
-
-		var str = '['+msg+']\n서버: '+world_name[wor_num-2]+'\n직업: '+job+'\n레벨: '+lev+'\n인기도: '+pop+'\n길드: '+gld+'\n대표캐릭터 여부: '+bon;
-		replier.reply(str);
 	}
+}
+function getTime(){//타이머 함수 구현
+    var now=new Date();
+    return now.getMinutes();
 }
