@@ -5,20 +5,17 @@ const world_num=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 const world_name=["리부트2","리부트","오로라","레드","이노시스","유니온","스카니아","루나","제니스","크로아","베라","엘리시움","아케인","노바","버닝"];
 
 function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName, threadId){
+
+	var sendInfo=new Object();//호출한사람 시간 객체
+
 	if(room_name.indexOf(room)!=-1 && msg.indexOf('!조회 ') != -1){
 		if(commander_name.indexOf(sender)==-1){
 			return;
 		}
-
-		var sendInfo=new Object();//호출한사람 시간 객체
-
-		if((!sender in sendInfo) || sendInfo[sender]+5<=getTime()){// 센더가 딕셔너리에 포함되어있지 않고, 5분이상이 지났을때
-			 //쿨타임 조정시 위의 [sender]+n(숫자) 를 원하는 분으로 설정
-			sendInfo[sender]=getTime();				//현재 시간의 분을 넣어버림
-			msg = msg.replace('!조회 ','');
-			var name = msg.toLowerCase();
-
-
+		msg = msg.replace('!조회 ','');
+		var name = msg.toLowerCase();
+		if( !(sender in sendInfo) || sendInfo[sender]+5<=getTime()){// 센더가 딕셔너리에 포함되어있지 않고, 5분이상이 지났을때
+			sendInfo[sender]=getTime();
 			var url = Utils.getWebText("https://maplestory.nexon.com/Ranking/World/Total?c="+msg);
 			var wor_num= url.split("search_com_chk")[1].split('img src="https://ssl.nx.com/s2/game/maplestory/renewal/common/world_icon/icon_')[1].split(".png")[0];
 
@@ -59,5 +56,5 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
 }
 function getTime(){//타이머 함수 구현
     var now=new Date();
-    return now.getMinutes();
+    return now.getSeconds();
 }
