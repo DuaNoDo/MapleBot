@@ -52,6 +52,9 @@ function response(room, msg, sender, isGroupChat, replier, ImageDB, packageName,
 		}else{
 				return;
 		}
+	}else{
+		replier.reply('분홍색만 가능해요~!.');
+		return;
 	}
 }
 function getTime(){//타이머 함수 구현
